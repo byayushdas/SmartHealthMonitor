@@ -1,0 +1,110 @@
+[
+    {
+        "id": "1b6b4a8aa46df042",
+        "type": "tab",
+        "label": "MQTT to Excel Logger",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "eecf4c9a3eab5467",
+        "type": "mqtt in",
+        "z": "1b6b4a8aa46df042",
+        "name": "MQTT Sensor Data",
+        "topic": "sensordata",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "7e263c50e1e77bb1",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 80,
+        "wires": [
+            [
+                "bcf2e4059e0e6ea6"
+            ]
+        ]
+    },
+    {
+        "id": "bcf2e4059e0e6ea6",
+        "type": "function",
+        "z": "1b6b4a8aa46df042",
+        "name": "Format Sensor Data",
+        "func": "// Parse the incoming JSON payload\nlet data = msg.payload;\n\n// If payload is a string, parse it\nif (typeof data === 'string') {\n    data = JSON.parse(data);\n}\n\n// Define CSV headers\nlet headers = \"Latitude,Longitude,HeartRate,SPo2,ECG,Temperature,Pressure,accX,accY,accZ,gyroX,gyroY,gyroZ\";\n\n// Extract values\nlet csvLine = `${data.latitude},${data.longitude},${data.heartRate},${data.spo2},${data.ecg},${data.temperature},${data.pressure},` +\n              `${data.acceleration.x},${data.acceleration.y},${data.acceleration.z},` +\n              `${data.gyroscope.x},${data.gyroscope.y},${data.gyroscope.z}`;\n\n// Combine headers + data\nmsg.payload = headers + \"\\n\" + csvLine + \"\\n\";\n\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 140,
+        "wires": [
+            [
+                "f3f04802cce4e792",
+                "7c9f68a65ff25ff2"
+            ]
+        ]
+    },
+    {
+        "id": "7c9f68a65ff25ff2",
+        "type": "debug",
+        "z": "1b6b4a8aa46df042",
+        "name": "Debug Output",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "f3f04802cce4e792",
+        "type": "file",
+        "z": "1b6b4a8aa46df042",
+        "name": "Save to CSV",
+        "filename": "/Users/ayushdas/Documents/data/sensors_data.csv",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "utf8",
+        "x": 770,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7e263c50e1e77bb1",
+        "type": "mqtt-broker",
+        "name": "Mosquitto Broker",
+        "broker": "test.mosquitto.org",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": ""
+    }
+]
