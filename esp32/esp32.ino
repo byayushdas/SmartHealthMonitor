@@ -18,8 +18,8 @@ HardwareSerial gpsSerial(2); // UART2
 #define UV_SENSOR_PIN 35
 
 // WiFi & MQTT Broker Configuration
-const char* ssid = "iQOO Legend";
-const char* password = "simple1234";
+const char* ssid = "ssid ";
+const char* password = "password";
 const char* mqtt_server = "test.mosquitto.org";
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -90,7 +90,16 @@ void loop() {
   pox.update();
   float heartRate = pox.getHeartRate();
   float spo2 = pox.getSpO2();
-  int ecgValue = analogRead(ECG_PIN);
+  int ecgRaw = analogRead(ECG_PIN);
+
+  // Convert ECG reading to mV
+  float ecgVoltage_mV = (ecgRaw / 4095.0) * 3300.0; // Convert to mV
+  float ecgReal_mV = ((ecgVoltage_mV - 1500.0) / 1000.0)*1.9; // Subtract offset and divide by gain
+if (ecgReal_mV < 0) {
+  ecgReal_mV *= -1;
+}
+
+
   float temperature = bmp.readTemperature();
   float pressure = bmp.readPressure() / 100.0;
 
@@ -112,8 +121,8 @@ void loop() {
   Serial.print(", Longitude: "); Serial.println(longitude, 6);
   Serial.print("HR: "); Serial.print(heartRate);
   Serial.print(" bpm, SpO2: "); Serial.print(spo2);
-  Serial.print(" %, ECG: "); Serial.print(ecgValue);
-  Serial.print(", Temp: "); Serial.print(temperature); Serial.print("°C");
+  Serial.print(" %, ECG: "); Serial.print(ecgReal_mV);
+  Serial.print(" mV, Temp: "); Serial.print(temperature); Serial.print("°C");
   Serial.print(", Pressure: "); Serial.print(pressure); Serial.print("hPa");
   Serial.print(", Acc(X,Y,Z): "); Serial.print(accX); Serial.print(","); Serial.print(accY); Serial.print(", "); Serial.print(accZ);
   Serial.print(", Gyro(X,Y,Z): "); Serial.print(gyroX); Serial.print(","); Serial.print(gyroY); Serial.print(", "); Serial.println(gyroZ);
@@ -127,14 +136,15 @@ void loop() {
   payload += "\"longitude\": " + String(longitude, 6) + ", ";
   payload += "\"heartRate\": " + String(heartRate) + ", ";
   payload += "\"spo2\": " + String(spo2) + ", ";
-  payload += "\"ecg\": " + String(ecgValue) + ", ";
+  payload += "\"ecg\": " + String(ecgReal_mV) + ", ";
   payload += "\"temperature\": " + String(temperature) + ", ";
   payload += "\"pressure\": " + String(pressure) + ", ";
   payload += "\"uvIndex\": " + String(uvIndex, 2) + ", ";
   payload += "\"acceleration\": {\"x\": " + String(accX, 2) + ", \"y\":" + String(accY, 2) + ", \"z\": " + String(accZ, 2) + "}, ";
   payload += "\"gyroscope\": {\"x\": " + String(gyroX, 2) + ", \"y\": " + String(gyroY, 2) + ", \"z\": " + String(gyroZ, 2) + "}";
   payload += "}";
-  client.publish("sensordata", payload.c_str());
+
+client.publish("ahmm", payload.c_str());
 
   delay(1000);
 }

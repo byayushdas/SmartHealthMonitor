@@ -1,58 +1,71 @@
 [
     {
-        "id": "1b6b4a8aa46df042",
+        "id": "ec5a9bdc865f6d67",
         "type": "tab",
-        "label": "MQTT to Excel Logger",
+        "label": "Flow 3",
         "disabled": false,
-        "info": ""
+        "info": "",
+        "env": []
     },
     {
-        "id": "eecf4c9a3eab5467",
+        "id": "59757767166fdc60",
         "type": "mqtt in",
-        "z": "1b6b4a8aa46df042",
-        "name": "MQTT Sensor Data",
-        "topic": "sensordata",
+        "z": "ec5a9bdc865f6d67",
+        "name": "ESP32 MQTT",
+        "topic": "ahmm",
         "qos": "0",
         "datatype": "json",
-        "broker": "7e263c50e1e77bb1",
+        "broker": "mqtt_broker_id",
         "nl": false,
-        "rap": true,
-        "rh": 0,
+        "rap": false,
         "inputs": 0,
-        "x": 150,
-        "y": 80,
+        "x": 210,
+        "y": 200,
         "wires": [
             [
-                "bcf2e4059e0e6ea6"
+                "bb9d82f86828bf4f",
+                "edbdd2b77a093bb1"
             ]
         ]
     },
     {
-        "id": "bcf2e4059e0e6ea6",
+        "id": "bb9d82f86828bf4f",
         "type": "function",
-        "z": "1b6b4a8aa46df042",
-        "name": "Format Sensor Data",
-        "func": "// Parse the incoming JSON payload\nlet data = msg.payload;\n\n// If payload is a string, parse it\nif (typeof data === 'string') {\n    data = JSON.parse(data);\n}\n\n// Define CSV headers\nlet headers = \"Latitude,Longitude,HeartRate,SPo2,ECG,Temperature,Pressure,accX,accY,accZ,gyroX,gyroY,gyroZ\";\n\n// Extract values\nlet csvLine = `${data.latitude},${data.longitude},${data.heartRate},${data.spo2},${data.ecg},${data.temperature},${data.pressure},` +\n              `${data.acceleration.x},${data.acceleration.y},${data.acceleration.z},` +\n              `${data.gyroscope.x},${data.gyroscope.y},${data.gyroscope.z}`;\n\n// Combine headers + data\nmsg.payload = headers + \"\\n\" + csvLine + \"\\n\";\n\nreturn msg;\n",
+        "z": "ec5a9bdc865f6d67",
+        "name": "Always Write CSV w/ Header",
+        "func": "const p = msg.payload;\n\nconst header = \"latitude,longitude,heartRate,spo2,ecg,temperature,pressure,uvIndex,accX,accY,accZ,gyroX,gyroY,gyroZ\\n\";\nconst csvLine = [\n    p.latitude,\n    p.longitude,\n    p.heartRate,\n    p.spo2 ?? \"\",\n    p.ecg,\n    p.temperature,\n    p.pressure,\n    p.uvIndex,\n    p.acceleration?.x,\n    p.acceleration?.y,\n    p.acceleration?.z,\n    p.gyroscope?.x,\n    p.gyroscope?.y,\n    p.gyroscope?.z\n].join(\",\") + \"\\n\";\n\n// Always write header + row (append mode)\nmsg.payload = header + csvLine;\n\nreturn msg;",
         "outputs": 1,
-        "timeout": "",
         "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 520,
-        "y": 140,
+        "x": 460,
+        "y": 200,
         "wires": [
             [
-                "f3f04802cce4e792",
-                "7c9f68a65ff25ff2"
+                "b24dae7bc7515965"
             ]
         ]
     },
     {
-        "id": "7c9f68a65ff25ff2",
+        "id": "b24dae7bc7515965",
+        "type": "file",
+        "z": "ec5a9bdc865f6d67",
+        "name": "CSV FILE",
+        "filename": "/Users/ayushdas/Documents/data.csv",
+        "filenameType": "str",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "utf8",
+        "x": 670,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "edbdd2b77a093bb1",
         "type": "debug",
-        "z": "1b6b4a8aa46df042",
-        "name": "Debug Output",
+        "z": "ec5a9bdc865f6d67",
+        "name": "debug",
         "active": true,
         "tosidebar": true,
         "console": false,
@@ -61,37 +74,19 @@
         "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
-        "x": 480,
-        "y": 60,
+        "x": 400,
+        "y": 120,
         "wires": []
     },
     {
-        "id": "f3f04802cce4e792",
-        "type": "file",
-        "z": "1b6b4a8aa46df042",
-        "name": "Save to CSV",
-        "filename": "/Users/ayushdas/Documents/data/sensors_data.csv",
-        "filenameType": "str",
-        "appendNewline": true,
-        "createDir": false,
-        "overwriteFile": "false",
-        "encoding": "utf8",
-        "x": 770,
-        "y": 140,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "7e263c50e1e77bb1",
+        "id": "mqtt_broker_id",
         "type": "mqtt-broker",
-        "name": "Mosquitto Broker",
+        "name": "Public Broker",
         "broker": "test.mosquitto.org",
         "port": "1883",
-        "clientid": "",
-        "autoConnect": true,
+        "clientid": "NodeRED_Client",
         "usetls": false,
-        "protocolVersion": "4",
+        "compatmode": true,
         "keepalive": "60",
         "cleansession": true,
         "birthTopic": "",
