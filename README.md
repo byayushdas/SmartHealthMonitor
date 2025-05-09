@@ -1,4 +1,4 @@
-Hardware Interface:-<br />
+Hardware Interface:-<br /><br />
 Modules/Sensors:
 - NodeMCU ESP32 Devkit V1<br />
 - MAX30100 (Heart Rate & Blood Oxygen Level)<br />
