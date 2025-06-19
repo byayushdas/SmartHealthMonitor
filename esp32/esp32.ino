@@ -2,7 +2,7 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP085.h> // BMP180 library
-#include "MAX30100_PulseOximeter.h"
+#include <MAX30100_PulseOximeter.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <TinyGPSPlus.h>
@@ -15,10 +15,10 @@ HardwareSerial gpsSerial(2); // UART2
 #define TXD2 17 // GPS RX → ESP32 GPIO17 (TX)
 
 // UV Sensor Pin
-#define UV_SENSOR_PIN 35
+#define UV_SENSOR_PIN 2
 
 // WiFi & MQTT Broker Configuration
-const char* ssid = "ssid ";
+const char* ssid = "ssid";
 const char* password = "password";
 const char* mqtt_server = "test.mosquitto.org";
 WiFiClient espClient;
@@ -27,7 +27,7 @@ PubSubClient client(espClient);
 Adafruit_MPU6050 mpu;
 Adafruit_BMP085 bmp;
 PulseOximeter pox;
-#define ECG_PIN 34
+#define ECG_PIN 15
 
 void onBeatDetected() {
   Serial.println("Beat Detected!");
